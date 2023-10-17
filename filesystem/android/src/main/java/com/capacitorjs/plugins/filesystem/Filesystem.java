@@ -317,10 +317,28 @@ public class Filesystem {
         String method = call.getString("method", "GET").toUpperCase(Locale.ROOT);
         String path = call.getString("path");
         String directory = call.getString("directory", Environment.DIRECTORY_DOWNLOADS);
-
-        final URL url = new URL(urlString);
+        
         final File file = getFileObject(path, directory);
-
+        if(urlString.startsWith("data")) {
+            byte[] bytes = Base64.decode(urlString, Base64.DEFAULT);
+            FileOutputStream fos = null;
+            try{
+                fos = new FileOutputStream(file);
+                fos.write(bytes);
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                if(fos != null) {
+                    fos.close();
+                }
+            }
+            return new JSObject() {
+                {
+                    put("filePath", "file://" + file.getAbsolutePath());
+                }
+            };
+        }    
+        final URL url = new URL(urlString);        
         HttpRequestHandler.HttpURLConnectionBuilder connectionBuilder = new HttpRequestHandler.HttpURLConnectionBuilder()
             .setUrl(url)
             .setMethod(method)
