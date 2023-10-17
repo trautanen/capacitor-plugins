@@ -320,17 +320,15 @@ public class Filesystem {
         
         final File file = getFileObject(path, directory);
         if(urlString.startsWith("data")) {
+            int idx = urlString.indexOf("base64,");
+            if(idx > 0) {
+                urlString = urlString.substring(idx + 7);
+            }            
             byte[] bytes = Base64.decode(urlString, Base64.DEFAULT);
-            FileOutputStream fos = null;
-            try{
-                fos = new FileOutputStream(file);
+            try(FileOutputStream fos = new FileOutputStream(file)){
                 fos.write(bytes);
             } catch (Exception e) {
                 throw e;
-            } finally {
-                if(fos != null) {
-                    fos.close();
-                }
             }
             return new JSObject() {
                 {
